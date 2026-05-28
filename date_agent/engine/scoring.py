@@ -21,8 +21,7 @@ import preferences as prefs
 
 log = logging.getLogger(__name__)
 
-# Day-of-week relevance per activity tag (0.0 to 1.0).
-# Reflects when each activity type naturally fits best.
+# Placeholder tag names — reconcile with engine/features.py once tag vocabulary is defined.
 _DOW_AFFINITY = {
     "restaurant":   {"monday": 0.5, "tuesday": 0.5, "wednesday": 0.6, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.8},
     "live_music":   {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
