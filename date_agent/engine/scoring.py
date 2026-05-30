@@ -180,13 +180,13 @@ def _weather_score(candidate, weather):
     return max(0.0, min(1.0, score))
 
 
-def _temporal_score(candidate, now):
+def _temporal_score(candidate, current_dt):
     """
     0.5 × day-of-week relevance  +  0.5 × time-of-day window fit.
     Candidates that match the current window tag get 1.0; mismatches get TIME_WINDOW_MISMATCH_PENALTY.
     """
-    dow  = now.strftime("%A").lower()
-    hour = now.hour
+    dow  = current_dt.strftime("%A").lower()
+    hour = current_dt.hour
     tags = candidate.get("tags", [])
 
     dow_scores = [_DOW_AFFINITY[t][dow] for t in tags if t in _DOW_AFFINITY]
