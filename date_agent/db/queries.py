@@ -4,7 +4,16 @@ from sqlalchemy.orm import Session
 from config import SEARCH_CACHE_TTL_HOURS
 
 
-def save_suggestion(content, category, vibe, price_tier, neighborhood, indoor_outdoor, tags, source):
+def save_suggestion(
+    content: str,
+    category: str,
+    vibe: str | None,
+    price_tier: str | None,
+    neighborhood: str | None,
+    indoor_outdoor: str | None,
+    tags: list[str],
+    source: str | None,
+) -> int:
     with Session(engine) as session:
         suggestion = Suggestion(
             content=content,
@@ -41,7 +50,7 @@ def get_recent_suggestions(n:int=10):
             for r in rows
         ]
 
-def save_feedback(suggestion_id, rating):
+def save_feedback(suggestion_id: int, rating: float) -> int:
     with Session(engine) as session:
         feedback = Feedback(
             suggestion_id=suggestion_id,

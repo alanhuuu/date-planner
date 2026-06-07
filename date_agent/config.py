@@ -2,6 +2,11 @@
 # All tunable parameters for the date night agent.
 # This is the only file you need to touch to adjust system behavior.
 # No logic lives here — just constants and settings.
+#
+# String keys in this file must match values defined in date_agent/tags.py.
+# Quick reference: DECAY_CONSTANTS → tags.DecayKey, ACTIVITY_EFFORT → tags.ActivityTag,
+# DURATION_ESTIMATES_MINUTES → tags.ActivityTag, SOURCE_QUALITY → tags.DataSource,
+# TIME_WINDOW_AFFINITY tags → tags.ActivityTag / tags.GenericTag.
 
 # ---------------------------------------------------------------------------
 # GROQ

@@ -2,6 +2,7 @@ import logging
 import math
 from datetime import date, datetime
 
+from tags import ActivityTag
 from config import (
     DECAY_CONSTANTS,
     FEEDBACK_DECAY_DAYS,
@@ -21,21 +22,22 @@ import preferences as prefs
 
 log = logging.getLogger(__name__)
 
-# Placeholder tag names — reconcile with engine/features.py once tag vocabulary is defined.
+# Day-of-week affinity scores per activity tag. Keys use ActivityTag.value strings
+# so they stay in sync with the tag vocabulary defined in tags.py.
 _DOW_AFFINITY = {
-    "restaurant":   {"monday": 0.5, "tuesday": 0.5, "wednesday": 0.6, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.8},
-    "live_music":   {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
-    "comedy_show":  {"monday": 0.3, "tuesday": 0.4, "wednesday": 0.5, "thursday": 0.6, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
-    "cocktail_bar": {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.6, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
-    "wine_bar":     {"monday": 0.3, "tuesday": 0.4, "wednesday": 0.5, "thursday": 0.6, "friday": 0.9, "saturday": 1.0, "sunday": 0.6},
-    "museum":       {"monday": 0.4, "tuesday": 0.6, "wednesday": 0.6, "thursday": 0.6, "friday": 0.7, "saturday": 0.9, "sunday": 0.9},
-    "art_gallery":  {"monday": 0.4, "tuesday": 0.6, "wednesday": 0.6, "thursday": 0.6, "friday": 0.7, "saturday": 0.9, "sunday": 0.9},
-    "market":       {"monday": 0.2, "tuesday": 0.3, "wednesday": 0.4, "thursday": 0.5, "friday": 0.6, "saturday": 1.0, "sunday": 0.9},
-    "hiking":       {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.3, "thursday": 0.3, "friday": 0.6, "saturday": 1.0, "sunday": 1.0},
-    "cycling":      {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.3, "thursday": 0.3, "friday": 0.5, "saturday": 1.0, "sunday": 1.0},
-    "picnic":       {"monday": 0.2, "tuesday": 0.2, "wednesday": 0.3, "thursday": 0.3, "friday": 0.5, "saturday": 1.0, "sunday": 1.0},
-    "brunch":       {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.3, "thursday": 0.3, "friday": 0.5, "saturday": 0.9, "sunday": 1.0},
-    "rooftop":      {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.4, "thursday": 0.5, "friday": 0.9, "saturday": 1.0, "sunday": 0.6},
+    ActivityTag.RESTAURANT.value:   {"monday": 0.5, "tuesday": 0.5, "wednesday": 0.6, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.8},
+    ActivityTag.LIVE_MUSIC.value:   {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
+    ActivityTag.COMEDY_SHOW.value:  {"monday": 0.3, "tuesday": 0.4, "wednesday": 0.5, "thursday": 0.6, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
+    ActivityTag.COCKTAIL_BAR.value: {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.6, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
+    ActivityTag.WINE_BAR.value:     {"monday": 0.3, "tuesday": 0.4, "wednesday": 0.5, "thursday": 0.6, "friday": 0.9, "saturday": 1.0, "sunday": 0.6},
+    ActivityTag.MUSEUM.value:       {"monday": 0.4, "tuesday": 0.6, "wednesday": 0.6, "thursday": 0.6, "friday": 0.7, "saturday": 0.9, "sunday": 0.9},
+    ActivityTag.ART_GALLERY.value:  {"monday": 0.4, "tuesday": 0.6, "wednesday": 0.6, "thursday": 0.6, "friday": 0.7, "saturday": 0.9, "sunday": 0.9},
+    ActivityTag.MARKET.value:       {"monday": 0.2, "tuesday": 0.3, "wednesday": 0.4, "thursday": 0.5, "friday": 0.6, "saturday": 1.0, "sunday": 0.9},
+    ActivityTag.HIKING.value:       {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.3, "thursday": 0.3, "friday": 0.6, "saturday": 1.0, "sunday": 1.0},
+    ActivityTag.CYCLING.value:      {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.3, "thursday": 0.3, "friday": 0.5, "saturday": 1.0, "sunday": 1.0},
+    ActivityTag.PICNIC.value:       {"monday": 0.2, "tuesday": 0.2, "wednesday": 0.3, "thursday": 0.3, "friday": 0.5, "saturday": 1.0, "sunday": 1.0},
+    ActivityTag.BRUNCH.value:       {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.3, "thursday": 0.3, "friday": 0.5, "saturday": 0.9, "sunday": 1.0},
+    ActivityTag.ROOFTOP.value:      {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.4, "thursday": 0.5, "friday": 0.9, "saturday": 1.0, "sunday": 0.6},
 }
 
 

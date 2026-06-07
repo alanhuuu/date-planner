@@ -5,6 +5,12 @@
 #
 # The scoring engine uses these weights when matching candidates against
 # your profile. Update these freely — they're just numbers.
+#
+# String keys in this file must match values defined in date_agent/tags.py.
+# Quick reference: CUISINE_WEIGHTS → tags.CuisineTag, ACTIVITY_WEIGHTS → tags.ActivityTag,
+# VIBE_WEIGHTS → tags.VibeTag, NEIGHBORHOOD_WEIGHTS → tags.NeighborhoodTag,
+# PRICE_WEIGHTS → tags.PriceTier, INDOOR_OUTDOOR_PREFERENCE → tags.IndoorOutdoor,
+# HARD_FILTERS → tags.ActivityTag / tags.GenericTag.
 
 # ---------------------------------------------------------------------------
 # CUISINE PREFERENCES
@@ -27,10 +33,7 @@ CUISINE_WEIGHTS = {
     "seafood":          0.7,
     "steakhouse":       0.5,
     "brunch":           0.8,
-    "cocktail_bar":     0.7,
-    "wine_bar":         0.7,
     "fast_food":       -0.8,
-    "chain":           -1.0,    # hard aversion to chains
     "buffet":          -0.5,
 }
 
@@ -57,11 +60,9 @@ ACTIVITY_WEIGHTS = {
     "festival":             0.9,
     "food_tour":            0.8,
     "cooking_class":        0.7,
-    "wine_tasting":         0.7,
     "escape_room":          0.5,
     "bowling":              0.4,
     "mini_golf":            0.4,
-    "axe_throwing":         0.5,
     "spa":                  0.6,
     "sports_game":          0.5,
     "club_nightlife":      -0.3,
@@ -96,8 +97,9 @@ NEIGHBORHOOD_WEIGHTS = {
     "villeray":         0.7,
     "hochelaga":        0.6,
     "downtown":         0.5,
+    "chinatown":        0.5,
     "westmount":        0.5,
-    "laval":           -0.3,    # prefer on-island
+    "laval":           -0.3,
     "south_shore":     -0.3,
 }
 
@@ -133,17 +135,13 @@ INDOOR_OUTDOOR_PREFERENCE = {
 }
 
 # ---------------------------------------------------------------------------
-# DIETARY / ACCESSIBILITY
-# ---------------------------------------------------------------------------
-DIETARY_RESTRICTIONS = []       # e.g. ["vegetarian", "gluten_free"]
-ACCESSIBILITY_NEEDS = []        # e.g. ["wheelchair_accessible"]
-
-# ---------------------------------------------------------------------------
 # SPECIAL DATES
 # The system will boost romantic + upscale suggestions in the week leading
 # up to these dates. Format: "MM-DD"
 # ---------------------------------------------------------------------------
 SPECIAL_DATES = {
-    # "02-14": "Valentine's Day",
-    # "MM-DD": "Anniversary",
+    "02-08": "Alexa's Birthday",
+    "02-14": "Valentine's Day",
+    "07-02": "Anniversary",
+    "11-17": "Alan's Birthday",
 }
