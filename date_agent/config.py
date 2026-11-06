@@ -2,6 +2,11 @@
 # All tunable parameters for the date night agent.
 # This is the only file you need to touch to adjust system behavior.
 # No logic lives here — just constants and settings.
+#
+# String keys in this file must match values defined in date_agent/tags.py.
+# Quick reference: DECAY_CONSTANTS → tags.DecayKey, ACTIVITY_EFFORT → tags.ActivityTag,
+# DURATION_ESTIMATES_MINUTES → tags.ActivityTag, SOURCE_QUALITY → tags.DataSource,
+# TIME_WINDOW_AFFINITY tags → tags.ActivityTag / tags.GenericTag.
 
 # ---------------------------------------------------------------------------
 # GROQ
@@ -158,38 +163,39 @@ TIME_WINDOW_MISMATCH_PENALTY = 0.5   # multiplier applied to out-of-window candi
 
 # ---------------------------------------------------------------------------
 # ENERGY / EFFORT SCORING
-# Maps day type to preferred effort level. Scale: 0.0 (passive) to 1.0 (active).
+# Maps day type to preferred effort level. Scale: 1 (very passive) to 5 (vigorous).
+# See tags.EffortLevel for the named levels.
 # ---------------------------------------------------------------------------
 ENERGY_PROFILE = {
-    "monday":    0.2,
-    "tuesday":   0.3,
-    "wednesday": 0.3,
-    "thursday":  0.4,
-    "friday":    0.7,
-    "saturday":  0.9,
-    "sunday":    0.5,
+    "monday":    1,   # low energy after the weekend
+    "tuesday":   2,
+    "wednesday": 2,
+    "thursday":  2,
+    "friday":    4,   # excited for the weekend
+    "saturday":  5,   # peak energy
+    "sunday":    3,   # moderate, winding down
 }
 
-# Effort level of activity tags (0.0 = passive, 1.0 = physically demanding)
+# Effort level of activity tags. Scale: 1 (passive) to 5 (vigorous). → tags.EffortLevel
 ACTIVITY_EFFORT = {
-    "hiking":        0.9,
-    "cycling":       0.8,
-    "kayaking":      0.8,
-    "skating":       0.7,
-    "dancing":       0.6,
-    "food_tour":     0.4,
-    "market":        0.3,
-    "museum":        0.2,
-    "art_gallery":   0.2,
-    "restaurant":    0.1,
-    "wine_bar":      0.1,
-    "cocktail_bar":  0.1,
-    "cinema":        0.1,
-    "comedy_show":   0.1,
-    "live_music":    0.2,
-    "rooftop":       0.2,
+    "hiking":        5,
+    "cycling":       4,
+    "kayaking":      4,
+    "skating":       4,
+    "dancing":       3,
+    "food_tour":     2,
+    "market":        2,
+    "museum":        1,
+    "art_gallery":   1,
+    "restaurant":    1,
+    "wine_bar":      1,
+    "cocktail_bar":  1,
+    "cinema":        1,
+    "comedy_show":   1,
+    "live_music":    1,
+    "rooftop":       1,
 }
-ENERGY_MISMATCH_PENALTY = 0.6   # multiplier when effort delta > 0.4
+ENERGY_MISMATCH_PENALTY = 0.6   # multiplier when effort delta > 2 (on 1–5 scale)
 
 # ---------------------------------------------------------------------------
 # DURATION COMPATIBILITY

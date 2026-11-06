@@ -21,13 +21,12 @@ import preferences as prefs
 
 log = logging.getLogger(__name__)
 
-# Placeholder tag names — reconcile with engine/features.py once tag vocabulary is defined.
+# Day-of-week affinity by activity type or category. String keys also appear
+# in the configurable time windows below.
 _DOW_AFFINITY = {
     "restaurant":   {"monday": 0.5, "tuesday": 0.5, "wednesday": 0.6, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.8},
     "live_music":   {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.7, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
     "comedy_show":  {"monday": 0.3, "tuesday": 0.4, "wednesday": 0.5, "thursday": 0.6, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
-    "cocktail_bar": {"monday": 0.3, "tuesday": 0.3, "wednesday": 0.5, "thursday": 0.6, "friday": 1.0, "saturday": 1.0, "sunday": 0.5},
-    "wine_bar":     {"monday": 0.3, "tuesday": 0.4, "wednesday": 0.5, "thursday": 0.6, "friday": 0.9, "saturday": 1.0, "sunday": 0.6},
     "museum":       {"monday": 0.4, "tuesday": 0.6, "wednesday": 0.6, "thursday": 0.6, "friday": 0.7, "saturday": 0.9, "sunday": 0.9},
     "art_gallery":  {"monday": 0.4, "tuesday": 0.6, "wednesday": 0.6, "thursday": 0.6, "friday": 0.7, "saturday": 0.9, "sunday": 0.9},
     "market":       {"monday": 0.2, "tuesday": 0.3, "wednesday": 0.4, "thursday": 0.5, "friday": 0.6, "saturday": 1.0, "sunday": 0.9},
@@ -57,26 +56,36 @@ def compute_recency_decay(last_seen_date, half_life_days):
 
 
 def _novelty_score(candidate, category_log):
+    """Score freshness using tags and dedicated category, vibe, price, and location.
+
+    History keys for vibe/price use the prefixes defined in DECAY_CONSTANTS;
+    neighborhoods use their own value with the shared neighborhood decay rate.
     """
-    novelty = 1 - max(recency_decay(tag)) across all known tags.
-    Tags never seen → decay 0 → candidate is maximally novel.
-    Tags seen recently → decay near 1 → candidate is stale.
-    """
-    tags = candidate.get("tags", [])
-    if not tags:
+    dimensions = {tag: DECAY_CONSTANTS.get(tag) for tag in candidate.get("tags", [])}
+    category = candidate.get("category")
+    if category:
+        dimensions[category] = DECAY_CONSTANTS.get(category)
+    for field, prefix in (("vibe", "vibe_"), ("price_tier", "price_")):
+        value = candidate.get(field)
+        if value:
+            key = prefix + value
+            dimensions[key] = DECAY_CONSTANTS.get(key)
+    neighborhood = candidate.get("neighborhood")
+    if neighborhood:
+        dimensions[neighborhood] = DECAY_CONSTANTS.get("neighborhood")
+    if not dimensions:
         return 0.5
 
     max_decay = 0.0
-    for tag in tags:
-        half_life = DECAY_CONSTANTS.get(tag)
+    for key, half_life in dimensions.items():
         if half_life is None:
             continue
-        entry = (category_log or {}).get(tag)
+        entry = (category_log or {}).get(key)
         last_seen = entry["last_suggested"] if entry else None
         decay = compute_recency_decay(last_seen, half_life)
         if decay > max_decay:
             max_decay = decay
-            log.debug("  novelty | tag=%s last_seen=%s decay=%.3f", tag, last_seen, decay)
+            log.debug("  novelty | key=%s last_seen=%s decay=%.3f", key, last_seen, decay)
 
     score = 1.0 - max_decay
     log.debug("  novelty | max_decay=%.3f → score=%.3f", max_decay, score)
@@ -187,7 +196,8 @@ def _temporal_score(candidate, current_dt):
     """
     dow  = current_dt.strftime("%A").lower()
     hour = current_dt.hour
-    tags = candidate.get("tags", [])
+    # Category is stored separately, including restaurant/activity window matches.
+    tags = list(dict.fromkeys(candidate.get("tags", []) + [candidate.get("category")]))
 
     dow_scores = [_DOW_AFFINITY[t][dow] for t in tags if t in _DOW_AFFINITY]
     dow_score  = sum(dow_scores) / len(dow_scores) if dow_scores else 0.5
@@ -245,7 +255,7 @@ def _diversity_score(candidate, recent_suggestions):
 def _feedback_score(candidate, feedback_rows):
     """
     Recency-weighted average of explicit ratings for suggestions with overlapping
-    tags or the same category. Normalized from [-1, 1] → [0, 1]; 0.5 = neutral.
+    tags, dedicated metadata, or the same category. Normalized to [0, 1].
 
     feedback_rows: list of {rating: float, created_at: datetime, tags: list, category: str}
     """
@@ -262,7 +272,11 @@ def _feedback_score(candidate, feedback_rows):
         row_tags     = set(row.get("tags") or [])
         row_category = row.get("category")
 
-        if not (row_tags & candidate_tags) and row_category != candidate_category:
+        shared_metadata = any(
+            candidate.get(field) is not None and candidate[field] == row.get(field)
+            for field in ("vibe", "price_tier", "neighborhood", "indoor_outdoor")
+        )
+        if not (row_tags & candidate_tags) and row_category != candidate_category and not shared_metadata:
             continue
 
         created_at = row.get("created_at")
