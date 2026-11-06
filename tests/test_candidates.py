@@ -57,7 +57,7 @@ class CandidateTests(unittest.TestCase):
                 tags=[' UPSCALE ', 'mile_end', 'relaxing', 'outdoor',
                       'ddg_search', 'restaurant', 'japanese', 'live_music', 'free'],
             )
-        self.assertEqual(model.tags, ['japanese', 'live_music', 'free'])
+        self.assertEqual(model.tags, ['japanese', 'live_music'])
         self.assertEqual(model.price_tier.value, 'mid')
         self.assertEqual(model.neighborhood.value, 'plateau')
         self.assertEqual(model.vibe.value, 'romantic')
@@ -76,7 +76,7 @@ class CandidateTests(unittest.TestCase):
             'vibe': 'unknown', 'price_tier': 99,
             'neighborhood': 'unknown', 'indoor_outdoor': 'unknown',
             'source': 'unknown', 'duration_minutes': -10,
-            'seasonal_relevance': 1.1, 'effort_level': 6,
+            'effort_level': 6,
             'requires_booking': 'maybe',
         }
         with self.assertLogs('candidate', level='WARNING'):
@@ -98,10 +98,7 @@ class CandidateTests(unittest.TestCase):
                     self.assertEqual(captured.exception.errors()[0]['loc'], ('category',))
 
     def test_numeric_boundaries(self):
-        for value in (0, 1):
-            self.assertEqual(Candidate(content='Example', seasonal_relevance=value).seasonal_relevance, value)
-        for field, value in [('duration_minutes', 0), ('seasonal_relevance', -0.1),
-                             ('seasonal_relevance', float('nan')), ('effort_level', 2.5)]:
+        for field, value in [('duration_minutes', 0), ('effort_level', 2.5)]:
             with self.subTest(field=field, value=value):
                 with self.assertLogs('candidate', level='WARNING'):
                     result = Candidate(content='Example', **{field: value})

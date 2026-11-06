@@ -6,7 +6,7 @@
 # String keys in this file must match values defined in date_agent/tags.py.
 # Quick reference: DECAY_CONSTANTS → tags.DecayKey, ACTIVITY_EFFORT → tags.ActivityTag,
 # DURATION_ESTIMATES_MINUTES → tags.ActivityTag, SOURCE_QUALITY → tags.DataSource,
-# TIME_WINDOW_AFFINITY tags → tags.ActivityTag / tags.GenericTag.
+# TIME_WINDOW_AFFINITY contains activity/category names and window match labels.
 
 # ---------------------------------------------------------------------------
 # GROQ

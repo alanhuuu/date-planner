@@ -33,8 +33,8 @@ def extract_features(raw: dict) -> dict:
 
     candidate = Candidate.model_validate(normalized).model_dump(mode="json")
     log.debug(
-        "features | '%s' → tags=%s vibe=%s price=%s neighborhood=%s io=%s",
-        name, candidate["tags"], candidate["vibe"],
+        "features | '%s' → misc_tags=%s vibe=%s price=%s neighborhood=%s io=%s",
+        name, candidate["misc_tags"], candidate["vibe"],
         candidate["price_tier"], candidate["neighborhood"], candidate["indoor_outdoor"],
     )
     return candidate

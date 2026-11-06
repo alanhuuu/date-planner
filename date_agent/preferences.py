@@ -10,7 +10,7 @@
 # Quick reference: CUISINE_WEIGHTS → tags.CuisineTag, ACTIVITY_WEIGHTS → tags.ActivityTag,
 # VIBE_WEIGHTS → tags.VibeTag, NEIGHBORHOOD_WEIGHTS → tags.NeighborhoodTag,
 # PRICE_WEIGHTS → tags.PriceTier, INDOOR_OUTDOOR_PREFERENCE → tags.IndoorOutdoor,
-# HARD_FILTERS → tags.ActivityTag / tags.GenericTag.
+# HARD_FILTERS contains raw source labels checked before candidate validation.
 
 # ---------------------------------------------------------------------------
 # CUISINE PREFERENCES

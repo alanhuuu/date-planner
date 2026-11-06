@@ -12,9 +12,9 @@ PYTHONPATH=date_agent python -m unittest discover -s tests -v
 ```
 
 `Candidate` in `date_agent/candidate.py` is a Pydantic model. It validates
-field types, enums, positive durations, and seasonal relevance between 0 and 1.
-`tags` accepts cuisine, activity types, and general labels without dedicated
-fields (for example `japanese`, `live_music`, and `free`). Category, vibe, price,
+field types, enums, and positive durations.
+`misc_tags` accepts cuisine and activity types without dedicated
+fields (for example `japanese` and `live_music`). Category, vibe, price,
 neighborhood, indoor/outdoor, and source values belong only in their named fields.
 Misplaced and unknown tag strings are logged and dropped; they never overwrite or
 fill a dedicated field. Invalid optional metadata is logged

@@ -98,9 +98,7 @@ class ActivityTag(str, Enum):
     PICNIC         = "picnic"
     FESTIVAL       = "festival"
     SPORTS_GAME    = "sports_game"
-    BRUNCH         = "brunch"       # meal activity (also in CUISINE_WEIGHTS — same string, valid either way)
     RESTAURANT     = "restaurant"
-    FINE_DINING    = "fine_dining"  # used in PAIRING_SCORES
 
 
 class CuisineTag(str, Enum):
@@ -122,32 +120,6 @@ class CuisineTag(str, Enum):
     STEAKHOUSE     = "steakhouse"
     FAST_FOOD      = "fast_food"
     BUFFET         = "buffet"
-
-
-class GenericTag(str, Enum):
-    """Cross-cutting labels used in boost_tags, HARD_FILTERS, seeds, and seasonal events.
-    These don't belong exclusively to one category above."""
-    OUTDOOR          = "outdoor"
-    FOOD             = "food"
-    MUSIC            = "music"
-    WINTER           = "winter"
-    FREE             = "free"
-    LATE_NIGHT       = "late_night"
-    PATIO            = "patio"
-    LIVE_PERFORMANCE = "live_performance"
-    CHAIN            = "chain"
-    HOT_CHOCOLATE    = "hot_chocolate"  # used in PAIRING_SCORES
-    SHOW             = "show"           # generic performance category in TIME_WINDOW_AFFINITY
-
-
-class EffortLevel(int, Enum):
-    """Discrete physical effort scale for candidates. Used in ACTIVITY_EFFORT and ENERGY_PROFILE.
-    Replaces the float 0.0–1.0 scale with human-readable levels."""
-    VERY_LOW  = 1  # passive: watching, listening, sitting at a bar
-    LOW       = 2  # light: museum stroll, market visit, food tour
-    MODERATE  = 3  # moderate: dancing, casual cycling on flat terrain
-    HIGH      = 4  # active: cycling hills, skating, vigorous hiking
-    VERY_HIGH = 5  # vigorous: backcountry hiking, kayaking, skiing
 
 
 # ---------------------------------------------------------------------------
@@ -176,8 +148,8 @@ class DecayKey(str, Enum):
 
 
 # ---------------------------------------------------------------------------
-# Values with dedicated fields must never appear in candidate.tags, even if
-# another enum also defines them (e.g. GenericTag.OUTDOOR).
+# Values with dedicated fields must never appear in candidate.misc_tags,
+# even if another enum also defines them (e.g. ActivityTag.RESTAURANT).
 # ---------------------------------------------------------------------------
 TAG_FIELD_BY_VALUE: dict[str, str] = {
     member.value: field
@@ -189,10 +161,10 @@ TAG_FIELD_BY_VALUE: dict[str, str] = {
     for member in enum_class
 }
 
-# Only cuisine, activity, and general labels without a dedicated field are tags.
+# Only cuisine and activity labels without a dedicated field are tags.
 ALL_KNOWN_TAGS: frozenset[str] = frozenset(
     tag.value
-    for cls in (ActivityTag, CuisineTag, GenericTag)
+    for cls in (ActivityTag, CuisineTag)
     for tag in cls
     if tag.value not in TAG_FIELD_BY_VALUE
 )

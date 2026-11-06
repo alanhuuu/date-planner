@@ -19,7 +19,7 @@ class Candidate(BaseModel):
 
     content: str
     category: Category = Category.ACTIVITY
-    tags: list[str] = Field(default_factory=list)
+    misc_tags: list[str] = Field(default_factory=list)
 
     vibe: VibeTag | None = None
     price_tier: PriceTier | None = None
@@ -27,14 +27,9 @@ class Candidate(BaseModel):
     indoor_outdoor: IndoorOutdoor | None = None
     source: DataSource | None = None
 
-    duration_minutes: int | None = Field(default=None, gt=0)
-    requires_booking: bool | None = None
-    seasonal_relevance: float | None = Field(default=None, ge=0, le=1)
-    effort_level: EffortLevel | None = None
-
-    @field_validator("tags")
+    @field_validator("misc_tags")
     @classmethod
-    def validate_tags(cls, tags: list[str], info: ValidationInfo) -> list[str]:
+    def validate_misc_tags(cls, tags: list[str], info: ValidationInfo) -> list[str]:
         clean = []
         for tag in tags:
             normalized = tag.strip().lower()
@@ -54,7 +49,7 @@ class Candidate(BaseModel):
 
     @field_validator(
         "vibe", "price_tier", "neighborhood", "indoor_outdoor",
-        "source", "duration_minutes", "requires_booking", "seasonal_relevance",
+        "source", "duration_minutes", "requires_booking",
         "effort_level", mode="wrap",
     )
     @classmethod
