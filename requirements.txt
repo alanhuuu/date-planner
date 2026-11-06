@@ -1,0 +1,2 @@
+# Candidate validation (Pydantic v2 API).
+pydantic>=2,<3
